@@ -3,6 +3,7 @@
 const express = require('express');
 const cors = require('cors');
 const pg = require('pg');
+const bodyParser = require('body-parser').urlencoded({extended: true});
 
 const app = express();
 const PORT = process.env.PORT;
@@ -23,5 +24,16 @@ app.get('/tasks', (req, res) => {
 });
 
 app.get('*', (req, res) => res.redirect(CLIENT_URL));
+
+app.post('/tasks/add', bodyParser, (req, res) => {
+  let {title, description, category, contact, status} = req.body;
+
+  client.query(`
+      INSERT INTO tasks(title, description, category, contact, status) VALUES($1, $2, $3, $4, $5)`,
+      [title, description, category, contact, status]
+    )
+    .then(results => res.sendStatus(201))
+    .catch(console.error);
+});
 
 app.listen(PORT, () => console.log(`Listening on port: ${PORT}`));
